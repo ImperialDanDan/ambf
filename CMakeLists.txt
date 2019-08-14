@@ -90,9 +90,12 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${PROJECT_SOURCE_DIR}/bin/${O
 
 # find dependencies
 find_package(yaml-cpp REQUIRED)
-find_package (OpenGL REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(Boost REQUIRED)
+
 include_directories(${YAML_CPP_INCLUDE_DIR})
-include_directories (OPENGL_INCLUDE_DIR)
+include_directories (${OPENGL_INCLUDE_DIR})
+include_directories(${Boost_INCLUDE_DIRS})
 
 # ROS Dependency
 if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
@@ -254,8 +257,10 @@ if (${CMAKE_BUILD_TYPE} MATCHES Debug)
   message (USING X86_64_ASM)
 endif ()
 if (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+  if (NOT ${CMAKE_HOST_SYSTEM_PROCESSOR}  MATCHES "aarch64")
     message (USING X86_64_ASM)
-  add_definitions ("-DUSE_X86_64_ASM")
+    add_definitions ("-DUSE_X86_64_ASM")
+  endif ()
 endif ()
 
 # build flags
@@ -287,7 +292,11 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 endif()
 
 if (NOT ${CMAKE_SYSTEM_NAME} MATCHES Windows)
-  set (AMBF_LIBRARIES ${AMBF_LIBRARIES} drd)
+  if (${CMAKE_HOST_SYSTEM_PROCESSOR}  MATCHES "aarch64")
+    set (AMBF_LIBRARIES ${AMBF_LIBRARIES})
+  else ()
+    set (AMBF_LIBRARIES ${AMBF_LIBRARIES} drd)
+  endif ()
   set (AMBF_LIBRARY_DIRS ${AMBF_LIBRARY_DIRS} ${DHD_LIBRARY_DIRS})
 else ()
   set (AMBF_LIBRARIES ${AMBF_LIBRARIES} winmm)

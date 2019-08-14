@@ -117,6 +117,9 @@ bool afPhysicalDevice::loadPhysicalDevice(YAML::Node *pd_node, std::string node_
     YAML::Node pDHardwareName = physicaDeviceNode["hardware name"];
     YAML::Node pDHapticGain = physicaDeviceNode["haptic gain"];
     YAML::Node pDControllerGain = physicaDeviceNode["controller gain"];
+    YAML::Node pDDeadband = physicaDeviceNode["deadband"];
+    YAML::Node pDMaxForce = physicaDeviceNode["max force"];
+    YAML::Node pDMaxJerk = physicaDeviceNode["max jerk"];
     YAML::Node pDWorkspaceScaling = physicaDeviceNode["workspace scaling"];
     YAML::Node pDSimulatedGripper = physicaDeviceNode["simulated multibody"];
     YAML::Node pDRootLink = physicaDeviceNode["root link"];
@@ -130,6 +133,7 @@ bool afPhysicalDevice::loadPhysicalDevice(YAML::Node *pd_node, std::string node_
     // Initialize Default Buttons
     m_buttons.A1 = 0;
     m_buttons.A2 = 1;
+    m_buttons.G1 = -1;
     m_buttons.NEXT_MODE = 2;
     m_buttons.PREV_MODE = 3;
 
@@ -239,6 +243,36 @@ bool afPhysicalDevice::loadPhysicalDevice(YAML::Node *pd_node, std::string node_
     }
     else{
         std::cerr << "WARNING: PHYSICAL DEVICE : \"" << node_name << "\" HAPTIC GAINES NOT DEFINED \n";
+    }
+
+    if (pDDeadband.IsDefined()){
+        double _deadBand = pDDeadband.as<double>();
+        if (_deadBand < 0){
+            std::cerr << "WARNING: PHYSICAL DEVICE : \"" << node_name << "\" DEAD BAND MUST BE POSITIVE, IGNORING \n";
+        }
+        else{
+            m_deadBand = _deadBand;
+        }
+    }
+
+    if (pDMaxForce.IsDefined()){
+        double _maxForce = pDMaxForce.as<double>();
+        if (_maxForce < m_deadBand){
+            std::cerr << "WARNING: MAX FORCE : \"" << node_name << "\" MUST BE GREATER THAN MIN FORCE, IGNORING \n";
+        }
+        else{
+            m_maxForce = _maxForce;
+        }
+    }
+
+    if (pDMaxJerk.IsDefined()){
+        double _maxJerk = pDMaxJerk.as<double>();
+        if (_maxJerk < 0){
+            std::cerr << "WARNING: MAX JERK : \"" << node_name << "\" MUST BE POSITIVE, IGNORING \n";
+        }
+        else{
+            m_maxJerk = _maxJerk;
+        }
     }
 
     if (_simulatedMBDefined){
@@ -359,6 +393,9 @@ bool afPhysicalDevice::loadPhysicalDevice(YAML::Node *pd_node, std::string node_
         }
         if (pDButtonMapping["a2"].IsDefined()){
             m_buttons.A2 = pDButtonMapping["a2"].as<int>();
+        }
+        if (pDButtonMapping["g1"].IsDefined()){
+            m_buttons.G1 = pDButtonMapping["g1"].as<int>();
         }
         if (pDButtonMapping["next mode"].IsDefined()){
             m_buttons.NEXT_MODE = pDButtonMapping["next mode"].as<int>();

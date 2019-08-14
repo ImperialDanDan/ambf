@@ -1492,6 +1492,13 @@ void updateHapticDevice(void* a_arg){
     _refSphere->setFrameSize(0.3);
     g_bulletWorld->addChild(_refSphere);
 
+    cVector3d force, torque;
+    cVector3d force_prev, torque_prev;
+    force.set(0,0,0);
+    torque.set(0,0,0);
+    force_prev.set(0,0,0);
+    torque_prev.set(0,0,0);
+
     // main haptic simulation loop
     while(g_simulationRunning)
     {
@@ -1518,6 +1525,10 @@ void updateHapticDevice(void* a_arg){
         }
         if (pDev->m_hInfo.m_sensedGripper){
             simGripper->m_gripper_angle = pDev->measuredGripperAngle();
+        }
+        else if (pDev->m_buttons.G1 > 0){
+            // Some devices may have a gripper button instead of a continous gripper.
+            simGripper->m_gripper_angle = !pDev->isButtonPressed(pDev->m_buttons.G1);
         }
         else{
             simGripper->m_gripper_angle = 0.5;
@@ -1651,10 +1662,39 @@ void updateHapticDevice(void* a_arg){
         drot.toAxisAngle(axis, angle);
         ddrot.toAxisAngle(daxis, dangle);
 
-        cVector3d force, torque;
-
+        force_prev = force;
+        torque_prev = torque_prev;
         force  = - g_cmdOpts.enableForceFeedback * pDev->K_lh_ramp * (P_lin * dpos + D_lin * ddpos);
         torque = - g_cmdOpts.enableForceFeedback * pDev->K_ah_ramp * (P_ang * angle * axis);
+
+        if ((force - force_prev).length() > pDev->m_maxJerk){
+            cVector3d normalized_force = force;
+            normalized_force.normalize();
+            double _sign = 1.0;
+            if (force.x() < 0 || force.y() < 0 || force.z() < 0){
+                _sign = 1.0;
+            }
+            force = force_prev + (normalized_force * pDev->m_maxJerk * _sign);
+        }
+
+        if (force.length() < pDev->m_deadBand){
+            force.set(0,0,0);
+        }
+
+        if (force.length() > pDev->m_maxForce){
+            force.normalize();
+            force = force * pDev->m_maxForce;
+        }
+
+        if (torque.length() < pDev->m_deadBand){
+            torque.set(0,0,0);
+        }
+
+        std::vector<float> force_msg;
+        force_msg.push_back(force.x());
+        force_msg.push_back(force.y());
+        force_msg.push_back(force.z());
+        simGripper->m_rootLink->m_afObjectPtr->set_userdata(force_msg);
 
         pDev->applyWrench(force, torque);
         rateSleep.sleep();

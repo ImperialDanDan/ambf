@@ -207,7 +207,7 @@ struct afSoftBodyConfigProperties: public btSoftBody::Config{
 /// \brief The Geometrytype enum
 ///
 enum GeometryType{
-    invalid= 0, mesh = 1, shape = 2
+    invalid= 0, mesh = 1, shape = 2, compound_shape = 3
 };
 
 
@@ -370,13 +370,13 @@ protected:
     bool _ang_gains_computed = false;
 
     // Toggle publishing of joint positions
-    bool _publish_joint_positions = false;
+    bool m_publish_joint_positions = false;
 
     // Toggle publishing of children names
-    bool _publish_children_names = false;
+    bool m_publish_children_names = false;
 
     // Toggle publishing of joint names
-    bool _publish_joint_names = true;
+    bool m_publish_joint_names = true;
 
     // Min and Max publishing frequency
     int _min_publish_frequency=50;

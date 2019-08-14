@@ -6,7 +6,9 @@
 
 
 ## [Wiki](https://github.com/WPI-AIM/ambf/wiki):
-Please checkout the Wiki for indepth details about AMBF, it's components, examples and concepts.
+Please checkout the [Wiki](https://github.com/WPI-AIM/ambf/wiki) for indepth details about AMBF, it's components, examples and concepts. You can also checkout the video below for a brief run down of some of the features of AMBF
+
+[![AMBF Simulator](https://img.youtube.com/vi/9REJVK1mwEU/maxresdefault.jpg)](https://www.youtube.com/watch?v=9REJVK1mwEU&t=0s)
 
 
 ## Description:
@@ -17,12 +19,31 @@ RL Agents on real-time data with simulation in the loop. This framework is built
 external tools that include an extended version of CHAI-3D (developed along-side AMBF), BULLET-Physics, Open-GL, GLFW, yaml-cpp, pyyaml and Eigen to name a few. Each external library has it's own license that can be found in the corresponding subfolder.
 
 ## Usage:
+### Tested Platforms:
+AMBF has been tested on **Ubuntu 16.04** and **Ubuntu 18.04**. We need a few extra steps on **Ubuntu 14.04**, please create an issue if you would like to get instructions for that. 
+
+Even though it is recommended to use Linux for the full feature set of AMBF Simulator using ROS, AMBF has been tested on **MacOS Maverick** and **MacOS Mojave** without ROS support. 
+
 ### Building:
-On Linux machines, you might need to install the `libasound2-dev` package
+On Linux machines, you might need to install the `libasound2-dev` package.
 
 ```
 sudo apt install libasound2-dev
 ```
+
+Boost libraires ship with Ubuntu systems, but on Mac OS, you might need to install them explicitly.
+
+For this purpose, on **Mac OS**, if you don't have Boost
+
+1. Install **Xcode** from App Store
+2. Install **command line tools** by running in terminal 
+`xcode-select --install`
+3. Install **Homebrew** view running this in terminal 
+`/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
+
+4. Install **boost** by running the following in the terminal
+`brew install boost`
+
 
 To build the framework (Linux and Mac-OS):
 ```
